@@ -1,0 +1,34 @@
+{
+  "name": "react-app-airline-search",
+  "version": "1.0.0",
+  "description": "Airline search",
+  "main": "index.js",
+  "scripts": {
+    "server": "nodemon server"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Jaswanth720/React-App-Airline-Search.git"
+  },
+  "keywords": [
+    "react"
+  ],
+  "author": "jash",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Jaswanth720/React-App-Airline-Search/issues"
+  },
+  "homepage": "https://github.com/Jaswanth720/React-App-Airline-Search#readme",
+  "dependencies": {
+    "cookie-parser": "^1.4.4",
+    "create-react-app": "^3.2.0",
+    "express": "^4.17.1",
+    "pg": "^7.12.1",
+    "request": "^2.88.0",
+    "request-promise": "^4.2.4"
+  },
+  "devDependencies": {
+    "concurrently": "^5.0.0",
+    "nodemon": "^1.19.3"
+  }
+}
