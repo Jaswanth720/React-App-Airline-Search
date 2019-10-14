@@ -4,6 +4,8 @@
   "description": "Airline search",
   "main": "index.js",
   "scripts": {
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "client": "npm start --prefix client",
     "server": "nodemon server"
   },
   "repository": {
@@ -20,10 +22,12 @@
   },
   "homepage": "https://github.com/Jaswanth720/React-App-Airline-Search#readme",
   "dependencies": {
+    "bootstrap": "^4.3.1",
     "cookie-parser": "^1.4.4",
     "create-react-app": "^3.2.0",
     "express": "^4.17.1",
     "pg": "^7.12.1",
+    "reactstrap": "^8.0.1",
     "request": "^2.88.0",
     "request-promise": "^4.2.4"
   },
