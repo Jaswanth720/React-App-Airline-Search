@@ -8,6 +8,16 @@ class Countries {
       callback(res);
     });
   }
+
+  static getCountry(selectedCountry) {
+    const q = `select name from airports where country = '${selectedCountry}'`;
+   db.query(q, (err, res) => {
+        if(err){
+          return selectedCountry(err);
+        } 
+        return res.json();
+    });
+  }
 }
 
 module.exports = Countries;
