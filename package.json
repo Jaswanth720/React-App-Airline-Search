@@ -2,11 +2,11 @@
   "name": "react-app-airline-search",
   "version": "1.0.0",
   "description": "Airline search",
-  "main": "index.js",
+  "main": "./server/index.js",
   "scripts": {
-    "dev": "concurrently \"npm run server\" \"npm run client\"",
-    "client": "npm start --prefix client",
-    "server": "nodemon server"
+    "client": "cd ./client && yarn start",
+    "server": "nodemon server",
+    "dev": "concurrently --kill-others-on-fail \"yarn server\" \"yarn client\""
   },
   "repository": {
     "type": "git",
@@ -27,6 +27,9 @@
     "create-react-app": "^3.2.0",
     "express": "^4.17.1",
     "pg": "^7.12.1",
+    "react": "^16.10.2",
+    "react-dom": "^16.10.2",
+    "react-scripts": "^3.2.0",
     "reactstrap": "^8.0.1",
     "request": "^2.88.0",
     "request-promise": "^4.2.4"
