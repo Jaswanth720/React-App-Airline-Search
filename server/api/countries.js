@@ -31,7 +31,7 @@ router.get('/:country', function (request, response) {
 
 router.get('/stops/:stops', function (request, response) {
   const stops = request.params.stops;
-  const q = `SELECT f.name FROM airlines f FULL OUTER JOIN routes r on f.airline_id = r.airline_id WHERE r.stops = '${stops}'`;
+  const q = `SELECT DISTINCT f.name FROM airlines f FULL OUTER JOIN routes r on f.airline_id = r.airline_id WHERE r.stops = '${stops}'`;
   db.query(q,(err, res) => {
     if(err) {
       console.log(err);
@@ -39,6 +39,30 @@ router.get('/stops/:stops', function (request, response) {
     response.json(res);
   });
 });
+
+
+router.get('/codeshare/:value', function (request, response) {
+  const codeshare_value = request.params.value;
+  const q = `SELECT DISTINCT f.name FROM airlines f FULL OUTER JOIN routes r on f.airline_id = r.airline_id WHERE r.codeshare = '${codeshare_value}'`;
+  db.query(q,(err, res) => {
+    if(err) {
+      console.log(err);
+    }
+    response.json(res);
+  });
+});
+
+router.get('/active/:value', function (request, response) {
+  const active_value = request.params.value;
+  const q = `SELECT DISTINCT name FROM airlines WHERE active = '${active_value}'`;
+  db.query(q,(err, res) => {
+    if(err) {
+      console.log(err);
+    }
+    response.json(res);
+  });
+});
+
 
 
 module.exports = router;

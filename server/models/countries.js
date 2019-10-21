@@ -18,6 +18,10 @@ class Countries {
         return res.json();
     });
   }
+
+//   static get_codeshare(get_codeshare) {
+//     const q = ``
+//   }
 }
 
 module.exports = Countries;

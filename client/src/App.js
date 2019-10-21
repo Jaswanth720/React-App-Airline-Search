@@ -22,6 +22,10 @@ class App extends React.Component {
       getAirlineData: [], //gets airpost for country /api/country/ (param)
       getStops: [],
       stopsInput: 0,
+      get_codeshareInput:"",
+      getcodeshare: [],
+      get_Active_Input:"",
+      getActiveList: []
     }
   }
 
@@ -34,6 +38,12 @@ class App extends React.Component {
       stopsInput: event.target.value
     });
     //this.setState({});
+    this.setState({
+      get_codeshareInput: event.target.value
+    });
+    this.setState({
+      get_Active_Input: event.target.value
+    });
   }
 
   handleGetAirlineButton = async() => {
@@ -50,6 +60,24 @@ class App extends React.Component {
     console.log(data);
     this.setState({ getStops: data});
     console.log(this.state.getStops);
+  }
+
+  handleGetCodeshareButton = async () => {
+    const get_codeshare = this.state.get_codeshareInput;
+    const res = await axios.get(`/api/countries/codeshare/${get_codeshare}`);
+    const  data  = res.data;
+    console.log(data);  
+    this.setState({ getcodeshare: data});
+    console.log(this.state.getcodeshare);
+  }
+
+  handleGetActiveButton = async () => {
+    const active_value = this.state.get_Active_Input;
+    const res = await axios.get(`/api/countries/active/${active_value}`);
+    const  data  = res.data;
+    console.log(data);  
+    this.setState({ getActiveList: data});
+    console.log(this.state.getActiveList);
   }
 
 // dark: #343a40
@@ -150,12 +178,37 @@ class App extends React.Component {
           <h1 className="display-3">Airline Using Codeshare</h1>
           <p className="lead">List of airlines operating with code share</p>
           <InputGroup>
-            <Input placeholder="Enter Country Name"/>
+            <Input placeholder="Enter Country Name" onChange={this.updateInputValue.bind(this)}/>
             <InputGroupAddon addonType="append">
-              <Button color="primary" >Get Airlines</Button>
-            </InputGroupAddon>
-            
+              <Button color="primary" onClick={this.handleGetCodeshareButton.bind(this)}>Get Airlines</Button>
+            </InputGroupAddon>          
           </InputGroup>
+          {this.state.getcodeshare.length > 1 && (
+            <div>
+            <h5 style={{ marginTop: '15px', marginBotton: '5px'}}>Results: </h5>
+            <hr />
+          <div className="getCountryTable" style={{ marginTop: '10px', overflowY: 'auto', height: '300px'}}>
+            <Table dark striped>
+              <thead>
+                <tr>
+                  <th></th>
+                  <th>Airline Name</th>
+                </tr>
+              </thead>
+              <tbody>
+                {this.state.getcodeshare.map((row, index) => {
+                  return(
+                    <tr key={index}>
+                    <td>{index + 1}</td>
+                    <td>{row.name}</td>
+                  </tr>
+                  );
+                })}
+              </tbody>
+            </Table>
+          </div>
+          </div>
+          )}
         </Jumbotron>
       </Col>
     </Row>
@@ -167,12 +220,37 @@ class App extends React.Component {
           <h1 className="display-3">Active Airlines</h1>
           <p className="lead">Find the list of active airlines in the United States</p>
           <InputGroup>
-            <Input placeholder="Enter Country Name"/>
+            <Input placeholder="Enter Country Name"  onChange={this.updateInputValue.bind(this)}/>
             <InputGroupAddon addonType="append">
-              <Button color="primary" >Get Airlines</Button>
-            </InputGroupAddon>
-            
+              <Button color="primary" onClick={this.handleGetActiveButton.bind(this)}>Get Airlines</Button>
+            </InputGroupAddon> 
           </InputGroup>
+          {this.state.getActiveList.length > 1 && (
+            <div>
+            <h5 style={{ marginTop: '15px', marginBotton: '5px'}}>Results: </h5>
+            <hr />
+          <div className="getCountryTable" style={{ marginTop: '10px', overflowY: 'auto', height: '300px'}}>
+            <Table dark striped>
+              <thead>
+                <tr>
+                  <th></th>
+                  <th>Airline Name</th>
+                </tr>
+              </thead>
+              <tbody>
+                {this.state.getActiveList.map((row, index) => {
+                  return(
+                    <tr key={index}>
+                    <td>{index + 1}</td>
+                    <td>{row.name}</td>
+                  </tr>
+                  );
+                })}
+              </tbody>
+            </Table>
+          </div>
+          </div>
+          )}
         </Jumbotron>
       </Col>
     </Row>
