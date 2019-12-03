@@ -25,7 +25,14 @@ class App extends React.Component {
       get_codeshareInput:"",
       getcodeshare: [],
       get_Active_Input:"",
-      getActiveList: []
+      getActiveList: [],
+      // getCountries: "",
+      getCounriesList:[],
+      getTopCitiesList:[],
+      get_source_airport_id: 0,
+      get_destination_airport_id : 0,
+      get_trips_List: []
+
     }
   }
 
@@ -43,6 +50,21 @@ class App extends React.Component {
     });
     this.setState({
       get_Active_Input: event.target.value
+    });
+    this.setState({
+      get_source_airport_id: event.target.value,
+    });
+    this.setState({
+      get_destination_airport_id: event.target.value
+    });
+    // this.setState({
+    //   getCountries: event.target.value
+    // });
+  }
+
+  updateInputValue2(event) {
+    this.setState({
+      get_destination_airport_id: event.target.value
     });
   }
 
@@ -78,6 +100,33 @@ class App extends React.Component {
     console.log(data);  
     this.setState({ getActiveList: data});
     console.log(this.state.getActiveList);
+  }
+  handleGetCountriesButton = async () => {
+    // const get_countries = this.state.getCountries;
+    const res = await axios.get(`/api/countries/most_airports/airports`);
+    const  data  = res.data;
+    console.log(data);  
+    this.setState({ getCounriesList: data});
+    console.log(this.state.getCounriesList);
+  }
+
+  handleGetTopCitiesButton = async () => {
+    // const get_countries = this.state.getCountries;
+    const res = await axios.get(`/api/countries/top_cities/cities`);
+    const  data  = res.data;
+    console.log(data);  
+    this.setState({ getTopCitiesList: data});
+    console.log(this.state.getTopCitiesList);
+  }
+
+  handleGetTripsButton = async () => {
+    const source_airport_value = this.state.get_source_airport_id;
+    const destination_airport_value = this.state.get_destination_airport_id;
+    const res = await axios.get(`/api/countries/find_trip/${source_airport_value}/${destination_airport_value}`);
+    const  data  = res.data;
+    console.log(data);
+    this.setState({ get_trips_List: data});      
+    console.log(this.state.get_trips_List);
   }
 
 // dark: #343a40
@@ -255,23 +304,46 @@ class App extends React.Component {
       </Col>
     </Row>
 
-
     <Row>
       <Col>
         <Jumbotron>
-          <h1 className="display-3">Highest Airports</h1>
+          <h1 className="display-3">Highest Airports in countries</h1>
           <p className="lead">Which country (or) territory has the highest number of Airports</p>
           <InputGroup>
-            <Input placeholder="Enter Country Name"/>
-            <InputGroupAddon addonType="append">
-              <Button color="primary" >Get Airlines</Button>
-            </InputGroupAddon>
-            
+            <Input placeholder="Click the button" />
+              <Button color="primary" onClick={this.handleGetCountriesButton.bind(this)}>Get Countries</Button> 
           </InputGroup>
+          {this.state.getCounriesList.length > 1 && (
+            <div>
+            <h5 style={{ marginTop: '15px', marginBotton: '5px'}}>Results: </h5>
+            <hr />
+          <div className="getCountryTable" style={{ marginTop: '10px', overflowY: 'auto', height: '300px'}}>
+            <Table dark striped>
+              <thead>
+                <tr>
+                  <th></th>
+                  <th>Country names</th>
+                  <th>Number of Airports</th>
+                </tr>
+              </thead>
+              <tbody>
+                {this.state.getCounriesList.map((row, index) => {
+                  return(
+                    <tr key={index}>
+                    <td>{index + 1}</td>
+                    <td>{row.country}</td>
+                    <td>{row.occurrences}</td>
+                  </tr>
+                  );
+                })}
+              </tbody>
+            </Table>
+          </div>
+          </div>
+          )}
         </Jumbotron>
       </Col>
     </Row>
-
 
 
     <Row>
@@ -280,15 +352,45 @@ class App extends React.Component {
           <h1 className="display-3">Top Cities</h1>
           <p className="lead">Top K cities with most incoming/outgoing airlines</p>
           <InputGroup>
-            <Input placeholder="Enter Country Name"/>
-            <InputGroupAddon addonType="append">
-              <Button color="primary" >Get Airlines</Button>
-            </InputGroupAddon>
-            
+            <Input placeholder="Click the button" />
+              <Button color="primary" onClick={this.handleGetTopCitiesButton.bind(this)}>Get Cities</Button> 
           </InputGroup>
+          {this.state.getTopCitiesList.length > 1 && (
+            <div>
+            <h5 style={{ marginTop: '15px', marginBotton: '5px'}}>Results: </h5>
+            <hr />
+          <div className="getCountryTable" style={{ marginTop: '10px', overflowY: 'auto', height: '300px'}}>
+            <Table dark striped>
+              <thead>
+                <tr>
+                  <th></th>
+                  <th>City </th>
+                  <th>Country</th>
+                  <th>Number of Incoming Airlines</th>
+                  <th>Number of Outgoing Airlines</th>
+                </tr>
+              </thead>
+              <tbody>
+                {this.state.getTopCitiesList.map((row, index) => {
+                  return(
+                    <tr key={index}>
+                    <td>{index + 1}</td>
+                    <td>{row.city}</td>
+                    <td>{row.country}</td>
+                    <td>{row.incoming}</td>
+                    <td>{row.outgoing}</td>
+                  </tr>
+                  );
+                })}
+              </tbody>
+            </Table>
+          </div>
+          </div>
+          )}
         </Jumbotron>
       </Col>
     </Row>
+
 
 
 
@@ -298,7 +400,60 @@ class App extends React.Component {
           <h1 className="display-3">Find Trips</h1>
           <p className="lead">Define a trip as a sequence of connected route. Find a trip that connects two cities X and Y (reachability)</p>
           <InputGroup>
-            <Input placeholder="Enter Country Name"/>
+            <Input placeholder="Enter Source airport Name" onChange={this.updateInputValue.bind(this)}/>
+            <Input placeholder="Enter Destination airport Name" onChange={this.updateInputValue2.bind(this)}/>
+            <InputGroupAddon addonType="prepend">
+              <Button color="primary" onClick={this.handleGetTripsButton.bind(this)}>Get Airlines</Button>
+            </InputGroupAddon>
+            </InputGroup>
+            {this.state.get_trips_List.length > 0 && (
+            <div>
+            <h5 style={{marginTop: '15px', marginBotton: '5px'}}>Results: </h5>
+            <hr />
+          <div className="getCountryTable" style={{marginTop: '10px', overflowY: 'auto', height: '300px'}}>
+            <Table dark striped>
+              <thead>
+                <tr>
+                  <th></th>
+                  <th>Route_id </th>
+                  <th>Source_aiport_id</th>
+                  <th>Destination_aiport_id</th>
+                  <th>Number of stops</th>
+                  <th>Distance</th>
+                </tr>
+              </thead>
+              <tbody>
+                {this.state.get_trips_List.map((row, index) => {
+                  return(
+                    <tr key={index}>
+                    <td>{index + 1}</td>
+                    <td>{row.route_id}</td>
+                    <td>{row.source_airport_id}</td>
+                    <td>{row.destination_airport_id}</td>
+                    <td>{row.num_stops}</td>
+                    <td>{row.distance}</td>
+                  </tr>
+                  );
+                })}
+              </tbody>
+            </Table>
+          </div>
+          </div>
+          )}
+          
+        </Jumbotron>
+      </Col>
+    </Row>
+
+
+
+    <Row>
+      <Col>
+        <Jumbotron>
+          <h1 className="display-3">Find Trips with K stops</h1>
+          <p className="lead">Find a trip that connects X and Y with less than Z stops (constrained reachability)</p>
+          <InputGroup>
+            <Input placeholder="Enter Country Name" />
             <InputGroupAddon addonType="append">
               <Button color="primary" >Get Airlines</Button>
             </InputGroupAddon>
@@ -312,10 +467,10 @@ class App extends React.Component {
     <Row>
       <Col>
         <Jumbotron>
-          <h1 className="display-3">Find Trips with K stops</h1>
-          <p className="lead">Find a trip that connects X and Y with less than Z stops (constrained reachability)</p>
+          <h1 className="display-3">Find cities within d hops</h1>
+          <p className="lead">Find all the cities reachable within d hops of a city (X) (bounded reachability). </p>
           <InputGroup>
-            <Input placeholder="Enter Country Name"/>
+            <Input placeholder="Enter Country Name" />
             <InputGroupAddon addonType="append">
               <Button color="primary" >Get Airlines</Button>
             </InputGroupAddon>
@@ -324,10 +479,7 @@ class App extends React.Component {
         </Jumbotron>
       </Col>
     </Row>
-    
-
-
-
+  
   </Container>
   );
   }
