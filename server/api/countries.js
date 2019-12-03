@@ -118,9 +118,17 @@ router.get('/top_cities/cities', function (request, response) {
 router.get('/find_trip/:source_value/:destination_value', function (request, response) {
   const source_airport_value = request.params.source_value;
   const destination_airport_value = request.params.destination_value;
-  const q = `Select * from minroutes
-  where source_airport_id = '${source_airport_value}' and destination_airport_id = '${destination_airport_value}'
-  limit 1`;
+  const q = `Select minroutes.route_id, source.name as source_name, dest.name as dest_name, minroutes.distance, count(distinct stopsV2.source_name) as num_stops, array_agg(stopsV2.source_name) from 
+  minroutes
+  left join airports as source on source.airport_id = minroutes.source_airport_id
+  Left join airports as dest on dest.airport_id = minroutes.destination_airport_id
+  Left outer join (Select route_id, source.name as source_name, dest.name as dest_name, distance from stops
+  left join airports as source on source.airport_id = stops.source_airport_id
+  Left join airports as dest on dest.airport_id = stops.destination_airport_id
+  Limit 50) as stopsV2 on minroutes.route_id = stopsV2.route_id
+  where source.name = '${source_airport_value}' and dest.name = '${destination_airport_value}' and stopsV2.source_name != source.name
+  Group by 1,2,3,4
+  limit 10;`;
   db.query(q,(err, res) => {
     console.log(res);
     console.log(q);
@@ -132,12 +140,12 @@ router.get('/find_trip/:source_value/:destination_value', function (request, res
 });
 
 
-router.get('/num_stops/:stops_value/:source_value/:destination_value', function (request, response) {
+router.get('/num_stops/:source_value/:destination_value/:stops_value', function (request, response) {
   const nums_stops_value = request.params.stops_value;
   const source_airport_value = request.params.source_value;
   const destination_airport_value = request.params.destination_value;
-  const q = `Select * from min_routes
-  where num_stops < '${nums_stops_value}' and source_airport_id = '${source_airport_value}' and destination_airport_id = '${destination_airport_value}'`;
+  const q = `Select * from minroutes
+  where num_stops < '${nums_stops_value}' and source_airport_id = '${source_airport_value}' and destination_airport_id = '${destination_airport_value}';`;
   
   db.query(q,(err, res) => {
     if(err) {
@@ -147,13 +155,14 @@ router.get('/num_stops/:stops_value/:source_value/:destination_value', function 
   });
 });
 
-router.get('/d_hops/:stops_value/:source_value', function (request, response) {
+router.get('/d_hops/:source_value/:stops_value', function (request, response) {
   const nums_stops_value = request.params.stops_value;
   const source_airport_value = request.params.source_value;
   // const destination_airport_value = request.params.destination_value;
-  const q = `Select destination_airport_id 
-  from min_routes
-  where source_airport_id = '${source_airport_value}' and num_stops < '${nums_stops_value}'`;
+  const q = `Select distinct destination_airport_id 
+  from minroutes
+  where source_airport_id = '${source_airport_value}' and num_stops < '${nums_stops_value}'
+  limit 10`;
   
   db.query(q,(err, res) => {
     if(err) {
@@ -162,9 +171,9 @@ router.get('/d_hops/:stops_value/:source_value', function (request, response) {
     response.json(res);
   });
 });
-
-
 
 
 
 module.exports = router;
+
+

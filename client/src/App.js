@@ -31,8 +31,10 @@ class App extends React.Component {
       getTopCitiesList:[],
       get_source_airport_id: 0,
       get_destination_airport_id : 0,
-      get_trips_List: []
-
+      get_trips_List: [],
+      get_trips_list_stops: [],
+      get_trips_stops: 0,
+      get_hops_list:[]
     }
   }
 
@@ -54,9 +56,7 @@ class App extends React.Component {
     this.setState({
       get_source_airport_id: event.target.value,
     });
-    this.setState({
-      get_destination_airport_id: event.target.value
-    });
+
     // this.setState({
     //   getCountries: event.target.value
     // });
@@ -68,6 +68,11 @@ class App extends React.Component {
     });
   }
 
+  updateInputValue_trip_stops(event) {
+    this.setState({
+      get_trips_stops: event.target.value
+    });
+  }
   handleGetAirlineButton = async() => {
     const countryRequested = (this.state.getAirlineInput).replace((this.state.getAirlineInput).charAt(0), (this.state.getAirlineInput).charAt(0).toUpperCase());
     const res = await axios.get(`/api/countries/${countryRequested}`);
@@ -129,6 +134,26 @@ class App extends React.Component {
     console.log(this.state.get_trips_List);
   }
 
+  handleGetTripsStopsButton = async () => {
+    const source_airport_value = this.state.get_source_airport_id;
+    const destination_airport_value = this.state.get_destination_airport_id;
+    const nums_stops_value = this.state.get_trips_stops;
+    const res = await axios.get(`/api/countries/num_stops/${source_airport_value}/${destination_airport_value}/${nums_stops_value}`);
+    const  data  = res.data;
+    console.log(data);
+    this.setState({ get_trips_list_stops: data});      
+    console.log(this.state.get_trips_list_stops);
+  }
+
+  handleGetHopsButton = async () => {
+    const source_airport_value = this.state.get_source_airport_id;
+    const nums_stops_value = this.state.get_trips_stops;
+    const res = await axios.get(`/api/countries/d_hops/${source_airport_value}/${nums_stops_value}`);
+    const  data  = res.data;
+    console.log(data);
+    this.setState({ get_hops_list: data});      
+    console.log(this.state.get_hops_list);
+  }
 // dark: #343a40
   render() {
   return (
@@ -428,10 +453,11 @@ class App extends React.Component {
                     <tr key={index}>
                     <td>{index + 1}</td>
                     <td>{row.route_id}</td>
-                    <td>{row.source_airport_id}</td>
-                    <td>{row.destination_airport_id}</td>
-                    <td>{row.num_stops}</td>
+                    <td>{row.source_name}</td>
+                    <td>{row.dest_name}</td>
                     <td>{row.distance}</td>
+                    <td>{row.num_stops}</td>
+                    <td>{row.array_agg}</td>
                   </tr>
                   );
                 })}
@@ -453,12 +479,49 @@ class App extends React.Component {
           <h1 className="display-3">Find Trips with K stops</h1>
           <p className="lead">Find a trip that connects X and Y with less than Z stops (constrained reachability)</p>
           <InputGroup>
-            <Input placeholder="Enter Country Name" />
+          <Input placeholder="Enter Source airport Name" onChange={this.updateInputValue.bind(this)}/>
+          <Input placeholder="Enter Destination airport Name" onChange={this.updateInputValue2.bind(this)}/>
+          <Input placeholder="Enter Number of stops" onChange={this.updateInputValue_trip_stops.bind(this)}/>
+
             <InputGroupAddon addonType="append">
-              <Button color="primary" >Get Airlines</Button>
+              <Button color="primary" onClick={this.handleGetTripsStopsButton.bind(this)}>Get Routes</Button>
             </InputGroupAddon>
-            
-          </InputGroup>
+            </InputGroup>
+            {this.state.get_trips_list_stops.length > 0 && (
+            <div>
+            <h5 style={{marginTop: '15px', marginBotton: '5px'}}>Results: </h5>
+            <hr />
+          <div className="getCountryTable" style={{marginTop: '10px', overflowY: 'auto', height: '300px'}}>
+            <Table dark striped>
+              <thead>
+                <tr>
+                  <th></th>
+                  <th>Route_id </th>
+                  <th>Source_aiport_id</th>
+                  <th>Destination_aiport_id</th>
+                  <th>Number of stops</th>
+                  <th>Distance</th>
+                </tr>
+              </thead>
+              <tbody>
+                {this.state.get_trips_list_stops.map((row, index) => {
+                  return(
+                    <tr key={index}>
+                    <td>{index + 1}</td>
+                    <td>{row.route_id}</td>
+                    <td>{row.source_airport_id}</td>
+                    <td>{row.destination_airport_id}</td>
+                    <td>{row.num_stops}</td>
+                    <td>{row.distance}</td>
+                  </tr>
+                  );
+                })}
+              </tbody>
+            </Table>
+          </div>
+          </div>
+          )}
+          
         </Jumbotron>
       </Col>
     </Row>
@@ -470,12 +533,41 @@ class App extends React.Component {
           <h1 className="display-3">Find cities within d hops</h1>
           <p className="lead">Find all the cities reachable within d hops of a city (X) (bounded reachability). </p>
           <InputGroup>
-            <Input placeholder="Enter Country Name" />
+          <Input placeholder="Enter Source airport Name" onChange={this.updateInputValue.bind(this)}/>
+          <Input placeholder="Enter Number of stops" onChange={this.updateInputValue_trip_stops.bind(this)}/>
             <InputGroupAddon addonType="append">
-              <Button color="primary" >Get Airlines</Button>
+              <Button color="primary" onClick={this.handleGetHopsButton.bind(this)}>Get destination within d hops</Button>
             </InputGroupAddon>
             
           </InputGroup>
+          {this.state.get_hops_list.length > 0 && (
+            <div>
+            <h5 style={{marginTop: '15px', marginBotton: '5px'}}>Results: </h5>
+            <hr />
+          <div className="getCountryTable" style={{marginTop: '10px', overflowY: 'auto', height: '300px'}}>
+            <Table dark striped>
+              <thead>
+                <tr>
+                  <th></th>
+                  <th>Destination_aiport_id</th>
+                </tr>
+              </thead>
+              <tbody>
+                {this.state.get_hops_list.map((row, index) => {
+                  return(
+                    <tr key={index}>
+                    <td>{index + 1}</td>
+                    <td>{row.destination_airport_id}</td>
+
+                  </tr>
+                  );
+                })}
+              </tbody>
+            </Table>
+          </div>
+          </div>
+          )}
+          
         </Jumbotron>
       </Col>
     </Row>
