@@ -15,7 +15,7 @@ router.get('/', function(request, response) {
 // GET selected country query
 router.get('/:country', function (request, response) {
   const countrySelected = request.params.country;
-  const q = `select name from airports where country = '${countrySelected}'`;
+  const q = `select name from airports where country like '%${countrySelected}%'`;
   db.query(q,(err, res) => {
     if(err) {
       console.log(err);
@@ -25,13 +25,20 @@ router.get('/:country', function (request, response) {
 });
   
 //GET selected number of stops
-// SELECT f.name FROM airlines f 
-// FULL OUTER JOIN routes r on f.airline_id = r.airline_id
-// WHERE r.stops = '1';
+// SELECT f.name, count(distinct r.dest_airport_id) as number_of_airports_serviced FROM airlines f 
+// left OUTER JOIN routes r on f.airline_id = r.airline_id
+// having count(distinct r.dest_airport_id) >= 50
+// order by count(distinct r.dest_airport_id)
+// limit 50;
 
 router.get('/stops/:stops', function (request, response) {
   const stops = request.params.stops;
-  const q = `SELECT DISTINCT f.name FROM airlines f FULL OUTER JOIN routes r on f.airline_id = r.airline_id WHERE r.stops = '${stops}'`;
+  const q = `SELECT f.name, count(distinct r.destination_airport_id) as number_of_airports_serviced FROM airlines f 
+  left OUTER JOIN routes r on f.airline_id = r.airline_id
+  Group by 1
+  having count(distinct r.destination_airport_id) >= '${stops}'
+  order by count(distinct r.destination_airport_id)
+  limit 50;`;
   db.query(q,(err, res) => {
     if(err) {
       console.log(err);
@@ -43,7 +50,7 @@ router.get('/stops/:stops', function (request, response) {
 
 router.get('/codeshare/:value', function (request, response) {
   const codeshare_value = request.params.value;
-  const q = `SELECT DISTINCT f.name FROM airlines f FULL OUTER JOIN routes r on f.airline_id = r.airline_id WHERE r.codeshare = '${codeshare_value}'`;
+  const q = `SELECT DISTINCT f.name FROM airlines f LEFT OUTER JOIN routes r on f.airline_id = r.airline_id WHERE r.codeshare = '${codeshare_value}'`;
   db.query(q,(err, res) => {
     if(err) {
       console.log(err);
@@ -54,7 +61,7 @@ router.get('/codeshare/:value', function (request, response) {
 
 router.get('/active/:value', function (request, response) {
   const active_value = request.params.value;
-  const q = `SELECT DISTINCT name FROM airlines WHERE active = '${active_value}'`;
+  const q = `SELECT DISTINCT name FROM airlines WHERE active = 'Y' and country = '${active_value}'`;
   db.query(q,(err, res) => {
     if(err) {
       console.log(err);
@@ -63,16 +70,16 @@ router.get('/active/:value', function (request, response) {
   });
 });
 
-router.get('/active/:value', function (request, response) {
-  const active_value = request.params.value;
-  const q = `SELECT DISTINCT name FROM airlines WHERE active = '${active_value}'`;
-  db.query(q,(err, res) => {
-    if(err) {
-      console.log(err);
-    }
-    response.json(res);
-  });
-});
+// router.get('/active/:value', function (request, response) {
+//   const active_value = request.params.value;
+//   const q = `SELECT DISTINCT name FROM airlines WHERE active = '${active_value}'`;
+//   db.query(q,(err, res) => {
+//     if(err) {
+//       console.log(err);
+//     }
+//     response.json(res);
+//   });
+// });
 
 router.get('/most_airports/airports', function (request, response) {
   // const active_value = request.params.value;
@@ -125,10 +132,9 @@ router.get('/find_trip/:source_value/:destination_value', function (request, res
   Left outer join (Select route_id, source.name as source_name, dest.name as dest_name, distance from stops
   left join airports as source on source.airport_id = stops.source_airport_id
   Left join airports as dest on dest.airport_id = stops.destination_airport_id
-  Limit 50) as stopsV2 on minroutes.route_id = stopsV2.route_id
+  ) as stopsV2 on minroutes.route_id = stopsV2.route_id
   where source.name = '${source_airport_value}' and dest.name = '${destination_airport_value}' and stopsV2.source_name != source.name
-  Group by 1,2,3,4
-  limit 10;`;
+  Group by 1,2,3,4;`;
   db.query(q,(err, res) => {
     console.log(res);
     console.log(q);
@@ -144,10 +150,19 @@ router.get('/num_stops/:source_value/:destination_value/:stops_value', function 
   const nums_stops_value = request.params.stops_value;
   const source_airport_value = request.params.source_value;
   const destination_airport_value = request.params.destination_value;
-  const q = `Select * from minroutes
-  where num_stops < '${nums_stops_value}' and source_airport_id = '${source_airport_value}' and destination_airport_id = '${destination_airport_value}';`;
+  const q = `Select minroutes.route_id, source.name as source_name, dest.name as dest_name, minroutes.distance, count(distinct stopsV2.source_name) as num_stops, array_agg(stopsV2.source_name) as layover_stops
+  from minroutes
+  left join airports as source on source.airport_id = minroutes.source_airport_id
+  Left join airports as dest on dest.airport_id = minroutes.destination_airport_id
+  Left outer join (Select route_id, source.name as source_name, dest.name as dest_name, distance from stops
+  left join airports as source on source.airport_id = stops.source_airport_id
+  Left join airports as dest on dest.airport_id = stops.destination_airport_id) as stopsV2 on minroutes.route_id = stopsV2.route_id
+  where source.name = '${source_airport_value}' and dest.name = '${destination_airport_value}' and  stopsV2.source_name != source.name
+  Group by 1,2,3,4
+  Having count(distinct stopsV2.source_name) < ${nums_stops_value};`;
   
   db.query(q,(err, res) => {
+    console.log(q);
     if(err) {
       console.log(err);
     }
@@ -159,11 +174,26 @@ router.get('/d_hops/:source_value/:stops_value', function (request, response) {
   const nums_stops_value = request.params.stops_value;
   const source_airport_value = request.params.source_value;
   // const destination_airport_value = request.params.destination_value;
-  const q = `Select distinct destination_airport_id 
+  /*const q = `Select distinct destination_airport_id 
   from minroutes
   where source_airport_id = '${source_airport_value}' and num_stops < '${nums_stops_value}'
-  limit 10`;
-  
+  limit 10`;*/
+  const q = `Select airport_id as id, iata, name, city, country, tz_database_timezone as timezone, type, min(num_stops) + 1 as num_stops
+  from
+  (Select minroutes.route_id, source.name as source_name, dest.name as dest_name, minroutes.distance, count(distinct stopsV2.source_name) as num_stops, array_agg(stopsV2.source_name) as layover_stops
+  from minroutes
+     left join airports as source on source.airport_id = minroutes.source_airport_id
+    Left join airports as dest on dest.airport_id = minroutes.destination_airport_id
+     Left outer join (Select route_id, source.name as source_name, dest.name as dest_name, distance from stops
+    left join airports as source on source.airport_id = stops.source_airport_id
+     Left join airports as dest on dest.airport_id = stops.destination_airport_id) as stopsV2 on minroutes.route_id = stopsV2.route_id
+   where source.name = '${source_airport_value}' and  stopsV2.source_name != source.name
+   Group by 1,2,3,4) as a
+  Left join airports on a.dest_name = airports.name
+  Group by 1,2,3,4,5,6, 7
+  Having min(num_stops) + 1 <= '${nums_stops_value}'
+  Order by min(num_stops) desc
+  Limit 25;`
   db.query(q,(err, res) => {
     if(err) {
       console.log(err);

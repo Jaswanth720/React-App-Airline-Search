@@ -252,7 +252,7 @@ class App extends React.Component {
           <h1 className="display-3">Airline Using Codeshare</h1>
           <p className="lead">List of airlines operating with code share</p>
           <InputGroup>
-            <Input placeholder="Enter Country Name" onChange={this.updateInputValue.bind(this)}/>
+            <Input placeholder="Enter a number from 0-10" onChange={this.updateInputValue.bind(this)}/>
             <InputGroupAddon addonType="append">
               <Button color="primary" onClick={this.handleGetCodeshareButton.bind(this)}>Get Airlines</Button>
             </InputGroupAddon>          
@@ -294,7 +294,7 @@ class App extends React.Component {
           <h1 className="display-3">Active Airlines</h1>
           <p className="lead">Find the list of active airlines in the United States</p>
           <InputGroup>
-            <Input placeholder="Enter Country Name"  onChange={this.updateInputValue.bind(this)}/>
+            <Input placeholder="Enter 'Y' that means YES " onChange={this.updateInputValue.bind(this)}/>
             <InputGroupAddon addonType="append">
               <Button color="primary" onClick={this.handleGetActiveButton.bind(this)}>Get Airlines</Button>
             </InputGroupAddon> 
@@ -509,10 +509,11 @@ class App extends React.Component {
                     <tr key={index}>
                     <td>{index + 1}</td>
                     <td>{row.route_id}</td>
-                    <td>{row.source_airport_id}</td>
-                    <td>{row.destination_airport_id}</td>
-                    <td>{row.num_stops}</td>
+                    <td>{row.source_name}</td>
+                    <td>{row.dest_name}</td>
                     <td>{row.distance}</td>
+                    <td>{row.num_stops}</td>
+                    <td>{row.layover_stops}</td>
                   </tr>
                   );
                 })}
@@ -549,7 +550,15 @@ class App extends React.Component {
               <thead>
                 <tr>
                   <th></th>
-                  <th>Destination_aiport_id</th>
+                  <th>id</th>
+                  <th>iata</th>
+                  <th>name</th>
+                  <th>city</th>
+                  <th>country</th>
+                  <th>timezone</th>
+                  <th>type</th>
+                  <th>num_stops</th>
+
                 </tr>
               </thead>
               <tbody>
@@ -557,7 +566,14 @@ class App extends React.Component {
                   return(
                     <tr key={index}>
                     <td>{index + 1}</td>
-                    <td>{row.destination_airport_id}</td>
+                    <td>{row.id}</td>
+                    <td>{row.iata}</td>
+                    <td>{row.name}</td>
+                    <td>{row.city}</td>
+                    <td>{row.country}</td>
+                    <td>{row.timezone}</td>
+                    <td>{row.type}</td>
+                    <td>{row.num_stops}</td>
 
                   </tr>
                   );
