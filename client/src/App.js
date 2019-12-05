@@ -427,7 +427,7 @@ class App extends React.Component {
           <InputGroup>
             <Input placeholder="Enter Source airport Name" onChange={this.updateInputValue.bind(this)}/>
             <Input placeholder="Enter Destination airport Name" onChange={this.updateInputValue2.bind(this)}/>
-            <InputGroupAddon addonType="prepend">
+            <InputGroupAddon addonType="append">
               <Button color="primary" onClick={this.handleGetTripsButton.bind(this)}>Get Airlines</Button>
             </InputGroupAddon>
             </InputGroup>
