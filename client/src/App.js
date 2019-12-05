@@ -99,7 +99,7 @@ class App extends React.Component {
   }
 
   handleGetActiveButton = async () => {
-    const active_value = this.state.get_Active_Input;
+    const active_value = (this.state.get_Active_Input).replace((this.state.getAirlineInput).charAt(0), (this.state.getAirlineInput).charAt(0).toUpperCase());
     const res = await axios.get(`/api/countries/active/${active_value}`);
     const  data  = res.data;
     console.log(data);  
@@ -210,7 +210,7 @@ class App extends React.Component {
           <h1 className="display-3">Airline on number of stops</h1>
           <p className="lead">Find the list of Airlines having X stops </p>
           <InputGroup>
-            <Input placeholder="Enter Country Name" onChange={this.updateInputValue.bind(this)} />
+            <Input placeholder="Enter a number from 0-10" onChange={this.updateInputValue.bind(this)} />
             <InputGroupAddon addonType="append">
               <Button color="primary" onClick={this.handleGetStopsButton.bind(this)}>Get Airlines</Button>
             </InputGroupAddon>
@@ -224,7 +224,7 @@ class App extends React.Component {
               <thead>
                 <tr>
                   <th></th>
-                  <th>Airport Name</th>
+                  <th>Airline Name</th>
                 </tr>
               </thead>
               <tbody>
@@ -252,7 +252,7 @@ class App extends React.Component {
           <h1 className="display-3">Airline Using Codeshare</h1>
           <p className="lead">List of airlines operating with code share</p>
           <InputGroup>
-            <Input placeholder="Enter a number from 0-10" onChange={this.updateInputValue.bind(this)}/>
+            <Input placeholder="Enter 'Y' that means YES" onChange={this.updateInputValue.bind(this)}/>
             <InputGroupAddon addonType="append">
               <Button color="primary" onClick={this.handleGetCodeshareButton.bind(this)}>Get Airlines</Button>
             </InputGroupAddon>          
@@ -292,9 +292,9 @@ class App extends React.Component {
       <Col>
         <Jumbotron>
           <h1 className="display-3">Active Airlines</h1>
-          <p className="lead">Find the list of active airlines in the United States</p>
+          <p className="lead">Find the list of active airlines in the Country</p>
           <InputGroup>
-            <Input placeholder="Enter 'Y' that means YES " onChange={this.updateInputValue.bind(this)}/>
+            <Input placeholder="Enter Country Name" onChange={this.updateInputValue.bind(this)}/>
             <InputGroupAddon addonType="append">
               <Button color="primary" onClick={this.handleGetActiveButton.bind(this)}>Get Airlines</Button>
             </InputGroupAddon> 
@@ -334,10 +334,10 @@ class App extends React.Component {
         <Jumbotron>
           <h1 className="display-3">Highest Airports in countries</h1>
           <p className="lead">Which country (or) territory has the highest number of Airports</p>
-          <InputGroup>
-            <Input placeholder="Click the button" />
+          {/* <InputGroup> */}
+            {/* <Input placeholder="Click the button" /> */}
               <Button color="primary" onClick={this.handleGetCountriesButton.bind(this)}>Get Countries</Button> 
-          </InputGroup>
+          {/* </InputGroup> */}
           {this.state.getCounriesList.length > 1 && (
             <div>
             <h5 style={{ marginTop: '15px', marginBotton: '5px'}}>Results: </h5>
@@ -376,10 +376,10 @@ class App extends React.Component {
         <Jumbotron>
           <h1 className="display-3">Top Cities</h1>
           <p className="lead">Top K cities with most incoming/outgoing airlines</p>
-          <InputGroup>
-            <Input placeholder="Click the button" />
+          {/* <InputGroup> */}
+            {/* <Input placeholder="Click the button" /> */}
               <Button color="primary" onClick={this.handleGetTopCitiesButton.bind(this)}>Get Cities</Button> 
-          </InputGroup>
+          {/* </InputGroup> */}
           {this.state.getTopCitiesList.length > 1 && (
             <div>
             <h5 style={{ marginTop: '15px', marginBotton: '5px'}}>Results: </h5>
@@ -441,10 +441,11 @@ class App extends React.Component {
                 <tr>
                   <th></th>
                   <th>Route_id </th>
-                  <th>Source_aiport_id</th>
-                  <th>Destination_aiport_id</th>
-                  <th>Number of stops</th>
+                  <th>From</th>
+                  <th>To</th>
                   <th>Distance</th>
+                  <th>Number of stops</th>
+                  <th>Layover Stops</th>
                 </tr>
               </thead>
               <tbody>
@@ -487,7 +488,7 @@ class App extends React.Component {
               <Button color="primary" onClick={this.handleGetTripsStopsButton.bind(this)}>Get Routes</Button>
             </InputGroupAddon>
             </InputGroup>
-            {this.state.get_trips_list_stops.length > 0 && (
+            {this.state.get_trips_list_stops != null && this.state.get_trips_list_stops.length > 0 && (
             <div>
             <h5 style={{marginTop: '15px', marginBotton: '5px'}}>Results: </h5>
             <hr />
@@ -497,10 +498,11 @@ class App extends React.Component {
                 <tr>
                   <th></th>
                   <th>Route_id </th>
-                  <th>Source_aiport_id</th>
-                  <th>Destination_aiport_id</th>
-                  <th>Number of stops</th>
+                  <th>From</th>
+                  <th>To</th>
                   <th>Distance</th>
+                  <th>Number of Stops</th>
+                  <th>Layover Airport</th>
                 </tr>
               </thead>
               <tbody>
