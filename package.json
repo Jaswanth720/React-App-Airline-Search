@@ -22,6 +22,7 @@
   },
   "homepage": "https://github.com/Jaswanth720/React-App-Airline-Search#readme",
   "dependencies": {
+    "@material-ui/core": "^4.7.1",
     "bootstrap": "^4.3.1",
     "cookie-parser": "^1.4.4",
     "create-react-app": "^3.2.0",
